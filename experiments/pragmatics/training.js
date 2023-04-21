@@ -111,7 +111,7 @@ function downloadData(safe) {
     var hiddenElement = document.createElement('a');
     hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(toSave);
     hiddenElement.target = '_blank';
-    hiddenElement.download = 'quantexAtHome-' + train.subid + '-' + data.task + '-' + day + '-' + time + '.json';
+    hiddenElement.download = 'symlit-prag-' + train.subid + '-' + data.task + '-' + day + '-' + time + '.json';
     hiddenElement.click();
 }
 
