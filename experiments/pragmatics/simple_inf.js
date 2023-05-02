@@ -1,7 +1,7 @@
 // the actual experiment
 var simple_inf = {
     // Parameters for this sequence.
-    trial: ["filler1", "filler2", 1, 2, 3, 4, 5,6,7,8,9,10],
+    trial: ["filler1", "filler2", 1, 2, 3, 4, 5],
     agents: ["Tiger"],
     agentOrient: [
         ["straight", "point", "down"],
@@ -10,21 +10,12 @@ var simple_inf = {
         ["straight", "point", "down"],
         ["straight", "point", "down"],
         ["straight", "point", "down"],
-        ["straight", "point", "down"],
-        ["straight", "point", "down"],
-        ["straight", "point", "down"],
-        ["straight", "point", "down"],
-        ["straight", "point", "down"],
         ["straight", "point", "down"]
     ],
-    object: ["tree", "pig","bear","helmet",  "dino"  ,  "house",    "bike",   "rocket", "wizard",  "truck",    "robot",    "donkey"],
-
-
-    
-
-    inf: ["right", "right", "left", "left", "right", "left", "right","left", "right", "right", "left", "right"],
+    object: ["tree", "pig", "bear", "robot", "rocket", "truck", "dino"],
+    inf: ["right", "right", "left", "left", "right", "left", "right"],
     data: [],
-    targetSwitch: ["stay", "switch", "stay", "switch", "switch", "stay", "switch","stay", "switch", "stay", "stay", "switch"],
+    targetSwitch: ["stay", "switch", "stay", "switch", "switch", "stay", "stay"],
 
 
 

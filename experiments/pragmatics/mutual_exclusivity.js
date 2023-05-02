@@ -1,25 +1,18 @@
 // the actual experiment
 var me = {
-    trial: [1,2,3,4,5,6,7,8,9,10],
-    agents: ["Cat","Cat","Cat","Cat","Bear","Bear","Bear","Sheep","Sheep","Sheep"],
+    trial: [1, 2, 3, 4, 5],
+    agents: ["Monkey", "Bunny", "Cat", "Dog", "Frog"],
     agentOrient: [
-        ["straight", "down"],
-        ["straight", "down"],
-        ["straight", "down"],
-        ["straight", "down"],
-        ["straight", "down"],
         ["straight", "down"],
         ["straight", "down"],
         ["straight", "down"],
         ["straight", "down"],
         ["straight", "down"]
     ],
-    novels: ["t01","t02","t03","t04","t05","t06","t07","t08","t09","t11"],
-    familiars: ["hanger", "pincer","apple","thermo", "sieve","corkscrew", "wrench", "lock","bread", "tweezers"],
-    back: [3,3,3,3,4,4,4,4,5,5],
-    novelPos: ["left", "right", "left", "left", "right", "right", "left", "right", "left", "right"],
-    words :["pilunt","wondie", "plosse" ,"raschlau","trelom", "tomen", "bokas", "zubi", "tikon", "palvi"],
-    hello: ["yes", "no", "no", "no","yes", "no" ,"no", "yes", "no", "no"],
+    novels: ["t22", "t21", "t23", "t37", "t25"],
+    familiars: ["carrot", "garlic", "eggplant", "duck", "horseshoe"],
+    back: [6, 7, 8, 9, 10],
+    novelPos: ["left", "right", "right", "left", "right"],
     data: [],
 
 
@@ -81,8 +74,6 @@ var me = {
             task: "mutual_exclusivity",
             trial: me.trial[0],
             item: me.agents[0],
-            familiar: me.familiars[0],
-            word: me.words[0],
             leftObject: LeftFruit,
             rightObject: RightFruit,
             correct_location: me.novelPos[0],
@@ -132,9 +123,7 @@ var me = {
         me.novelPos.shift();
         me.novels.shift();
         me.familiars.shift();
-        me.words.shift();
         me.back.shift();
-        me.hello.shift();
 
 
 
@@ -176,7 +165,7 @@ var me = {
 
         // play choice sound
 
-        sourceSound("sound/me/"+me.agents[0]+"_"+me.words[0]+".mp3");
+        sourceSound("sound/" + me.agents[0] + "_me_choice.mp3");
         playSound();
 
         // choice can be made by clicking the objects after - possible after 5s
@@ -215,14 +204,11 @@ var me = {
         showAgent(me.agents[0], me.agentOrient[0][0]);
 
         // play hello sound and write name of agent
-        
-        if (me.hello[0] == "yes") {
         if (me.agentOrient[0][0] == "straight") {
             pause("moveButton", 1600);
             sourceSound("sound/" + me.agents[0] + "_hello.mp3");
             playSound();
         };
-    }
 
         // display obejcts on table depending on training and test condition
 

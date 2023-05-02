@@ -53,24 +53,6 @@ var preSounds = [
     "Dog_train.mp3",
     "end.mp3",
     "Frog_hello.mp3",
-    "me/Bear_bokas.mp3",
-    "me/Bear_hoefas.mp3",
-    "me/Bear_tomen.mp3",
-    "me/Bear_trelom.mp3",
-    "me/Cat_pilunt.mp3",
-    "me/Cat_plosse.mp3",
-    "me/Cat_raschlau.mp3",
-    "me/Cat_wondie.mp3",
-    "me/Dog_train.mp3",
-    "me/Frog_kattel.mp3",
-    "me/Frog_munki.mp3",
-    "me/Frog_towak.mp3",
-    "me/Frog_ukam.mp3",
-    "me/Monkey_train.mp3",
-    "me/Sheep_palvi.mp3",
-    "me/Sheep_tikon.mp3",
-    "me/Sheep_wittu.mp3",
-    "me/Sheep_zubi.mp3",
     "Monkey_hello.mp3",
     "Monkey_train.mp3",
     "Sheep_hello.mp3"
@@ -625,7 +607,7 @@ var train = {
         }
         train.subid = document.getElementById("subjectID").value
         train.subage = document.getElementById("subjectAge").value
-        train.trainingDot()
+        showSlide("select")
     },
 
 
