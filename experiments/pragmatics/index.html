@@ -122,7 +122,8 @@
             <p id='logo-text'>Auswahl</p>
             <table style="width:100%">
                 <tbody>
-
+                    <trainButton type="button" onClick="this.blur(); showSlide('training');submitButtonStyle(this)">Training</trainButton>
+                    
                     <meButton type="button" onClick="this.blur(); me.next();submitButtonStyle(this)">Mutual Exclusivity</meButton>
 
                     <infButton type="button" onClick="this.blur(); showSlide('inf_training');submitButtonStyle(this)">Informativeness</infButton>
