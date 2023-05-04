@@ -14,19 +14,19 @@ targetPositionTest = ['right', 'left', 'right', 'left', 'right', 'left', 'right'
 
 var targetPositions = targetPositionFam.concat(targetPositionTest)
 
-// var targetShape = ([
-//     shuffle(["A", "B"]),
-//     shuffle(["A", "B"]),
-// ]).flat()
+var targetShape = ([
+    shuffle(["A", "B"]),
+    shuffle(["A", "B"]),
+]).flat()
 
 
 var condition = shuffle(["repr", "pars", "orfe", "fcom", "abpo"])
 
 var actions = ["look", "eyesclosed", "open", "play", "hidebanana", "holdbanana", "occluderup", "blocksup", "holdemptyhands", "blocksdown", "occluderdown", "holdpaper", "help", "draw", "helpwhere", "showcue"]
 
-var items = ["pars_tar_4", "abpo_tar_3" ,"repr_tar_2", "pars_tar_3", "fcom_tar_4", "repr_tar_4", "repr_tar_3", "pars_tar_1", "abpo_tar_4" ,"abpo_tar_1" ,"orfe_tar_3", "orfe_tar_4", "fcom_tar_1","orfe_tar_1" ,"fcom_tar_3" ,"repr_tar_1", "abpo_tar_2" ,"pars_tar_2", "fcom_tar_2" ,"orfe_tar_2"]
+var items = ["pars_tar_4", "abpo_tar_3" ,"repr_tar_2", "pars_tar_3", "fcom_tar_4", "repr_tar_4", "pars_tar_1", "repr_tar_3", "abpo_tar_4" ,"orfe_tar_3","abpo_tar_1" , "orfe_tar_4", "fcom_tar_1","orfe_tar_1" ,"fcom_tar_3" ,"repr_tar_1", "abpo_tar_2" ,"pars_tar_2", "fcom_tar_2" ,"orfe_tar_2"]
 
-var cues = ["pars_cue_4", "abpo_cue_3" ,"repr_cue_2", "pars_cue_3", "fcom_cue_4", "repr_cue_4", "repr_cue_3", "pars_cue_1", "abpo_cue_4" ,"abpo_cue_1" ,"orfe_cue_3", "orfe_cue_4", "fcom_cue_1","orfe_cue_1" ,"fcom_cue_3" ,"repr_cue_1", "abpo_cue_2" ,"pars_cue_2", "fcom_cue_2" ,"orfe_cue_2"]
+var cues = ["pars_cue_4", "abpo_cue_3" ,"repr_cue_2", "pars_cue_3", "fcom_cue_4", "repr_cue_4", "pars_cue_1", "repr_cue_3", "abpo_cue_4" ,"orfe_cue_3","abpo_cue_1" , "orfe_cue_4", "fcom_cue_1","orfe_cue_1" ,"fcom_cue_3" ,"repr_cue_1", "abpo_cue_2" ,"pars_cue_2", "fcom_cue_2" ,"orfe_cue_2"]
 
 var targetShapes = ['B', 'A', 'B', 'A','B', 'A', 'A', 'B','A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'B', 'A', 'B', 'A']
 
