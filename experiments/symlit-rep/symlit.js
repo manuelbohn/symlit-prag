@@ -34,8 +34,7 @@ showSlide("instructions")
 
 var symlit = {
     // Parameters for this sequence.
-    // trial: ["fam", "fam", "fam", "fam", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18,19,20],
-    trial: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18,19,20],
+    trial: ["fam", "fam", "fam", "fam", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18,19,20],
     action: Object.assign([], actions),
     targetShape: targetShapes,
     item: items,
