@@ -1,0 +1,254 @@
+---
+title: "Measurement Models"
+format: html
+editor: visual
+---
+```{r}
+library(tidyverse)
+library(ggpubr)
+library(ggthemes)
+library(tidybayes)
+library(brms)
+library(rstan)
+library(loo)
+library(coda)
+library(testing)
+library(geomtextpath)
+library(ggridges)
+library(mirt)
+library(lavaan)
+
+estimate_mode <- function(s) {
+  d <- density(s)
+  return(d$x[which.max(d$y)])
+}
+
+hdi_upper<- function(s){
+  m <- HPDinterval(mcmc(s))
+  return(m["var1","upper"])
+}
+
+hdi_lower<- function(s){
+  m <- HPDinterval(mcmc(s))
+  return(m["var1","lower"])
+}
+
+func <- function(x){
+  abs(1-x)
+}
+```
+
+# Data        
+
+```{r}
+d <- read.csv("../data/pragbat_data.csv")%>%
+  separate(item, into = c("item", "x"), sep = "_")%>%
+  select(-x)
+
+```
+
+```{r}
+d%>%
+  group_by(task)%>%
+  summarise(items = n_distinct(item))
+```
+
+
+# Rasch Model
+
+```{r}
+prior_rasch <- prior("normal(0, 2)", class = "b", nlpar = "eta") +
+  prior("normal(0, 1)", class = "sd", group = "id", nlpar = "eta") +
+  prior("normal(0, 3)", class = "sd", group = "item", nlpar = "eta")
+
+m1PL <- brm(
+  data = d,
+  family = brmsfamily("bernoulli", "identity"),
+  bf(
+    correct ~ 0.5 + 0.5 * inv_logit(eta),
+    eta ~ 1 + (1 | item) + (1 | id),
+    nl = TRUE
+  ),
+  prior = prior_rasch,
+  control = list(adapt_delta = 0.95, max_treedepth = 12),
+  cores = 3,
+  chains = 3,
+  iter = 4000
+)%>%add_criterion(c("loo"))
+
+saveRDS(m1PL, "./saves/m1PL.rds")
+
+m1PL <- readRDS("./saves/m1PL.rds")
+```
+
+```{r}
+icc_1PL <- posterior_samples(m1PL)%>% 
+  select(b_eta_Intercept, starts_with("r_item"))%>%
+  mutate(iter = 1:n()) %>% 
+  pivot_longer(starts_with("r_item"), names_to = "item", values_to = "xi") %>%
+  mutate(item = str_extract(string = item, pattern = "(?<=\\[).*(?=,Intercept\\])"))%>%
+  expand(nesting(iter, b_eta_Intercept, item, xi),
+         theta = seq(from = -6, to = 6, length.out = 100)) %>% 
+  mutate(p = 0.5 + 0.5*inv_logit_scaled((b_eta_Intercept + theta + xi))) %>%  
+  group_by(theta, item) %>% 
+  summarise(p = mean(p))%>%
+  left_join(d%>%select(item, task)%>%distinct(item, .keep_all = T))
+```
+
+## ICC
+
+```{r}
+icc_1PL %>% 
+  #filter(item %in% sel_items_rasch)%>%
+  ggplot(aes(x = theta, y = p,group = item, col = item, lty = task)) +
+  geom_line() +
+  #facet_wrap(~group)+
+  #guides(col = F)+
+  geom_hline(yintercept = 0.5, lty = 3, alpha = .75)+
+  scale_color_discrete(name = "AoA") +
+  labs(title = "ICCs for the 1PL",
+       x = expression(theta~('ability on the logit scale')),
+       y = expression(italic(p)(y==1))) +
+  ylim(0,1)+
+  theme_minimal()
+```
+## Fit indices
+
+Compute in and outfit to see how well individual items fit the Rasch model.
+
+```{r}
+fit_indices <- d%>%
+  add_epred_draws(m1PL, re_formula = ~(1 | item) + (1 | id), ndraws = 5000)%>%
+  mutate(zvi = (correct - .epred)/(.epred*(1-.epred))^0.5)%>%
+  group_by(task, item,.draw)%>%
+  summarise(outfit = sum(zvi^2)/length(unique(id)),
+            infit = (sum(zvi^2*(.epred*(1-.epred)))/sum(.epred*(1-.epred))))
+```
+
+```{r}
+fit_indices%>%
+  pivot_longer(names_to = "fit_index", values_to = "value", cols = c(outfit, infit))%>%
+  ggplot(. , aes(y = item, x = value, col = fit_index))+
+  geom_vline(xintercept = c(0.7, 1.3), lty = 3, alpha = .5)+
+  geom_vline(xintercept = c(0.5, 1.5), lty = 2, alpha = .5)+
+  geom_vline(xintercept = 1, lty = 1, alpha = .5, col = "darkgreen")+
+  stat_halfeye(alpha = .75, .width = c(0.66, 0.95), position = position_dodge(width = .5))+
+  scale_fill_colorblind()+
+  scale_color_colorblind(name = "Fit index")+
+    labs(x = "Index value", y = "Item")+
+  facet_grid(task~., scales = "free_y")+
+  scale_x_continuous(breaks = c(0,0.5, 07, 1, 1.3, 1.5), labels = c(0,0.5, 07, 1, 1.3, 1.5), limits = c(0,7))+
+  theme_bw()+
+  theme(legend.position = c(0.8,0.8))
+```
+## Frequentist fit indices
+
+```{r}
+frq_fit_dat <- d%>%
+  filter(item != "carrot", 
+         item != "duck")%>%
+  distinct(id, task, item, .keep_all = T)%>%
+  select(id, item, correct)%>%
+  pivot_wider(names_from = item, values_from = correct)%>%
+  select( -id)%>%
+  na.omit()
+
+items <- d%>%
+  filter(item != "carrot", 
+         item != "duck")%>%
+  distinct(item)%>%
+  pull(item)
+
+# using lavaan, no idea how to build in the guessing rate
+
+modelx <- paste(paste0("1*",items, "+"), collapse = " ")
+
+model <- paste0("f =~", substr(modelx, 1, nchar(modelx)-1))
+
+freq <- sem(model, frq_fit_dat, ordered =TRUE, parameterization = "theta")
+ 
+fitMeasures(freq)%>%as_tibble(rownames = "index")%>%
+  filter(index == "rmsea" | index == "cfi" | index == "srmr")
+
+
+# using mirt
+
+freq_mirt <- mirt(frq_fit_dat, 1, itemtype='Rasch', verbose=TRUE, guess = 0.5,na.rm=TRUE,
+                technical = list(NCYCLES = 2000))
+
+M2(freq_mirt)
+
+itemfit(freq_mirt, fit_stats = c("infit"))
+```
+
+
+# 2PL 
+
+Fit 2PL model for comparison.
+
+```{r}
+prior_2PL <-
+  prior("normal(0, 2)", class = "b", nlpar = "eta") +
+  prior("normal(0, 1)", class = "b", nlpar = "logalpha") +
+  prior("normal(0, 1)", class = "sd", group = "id", nlpar = "eta") +
+  prior("normal(0, 3)", class = "sd", group = "item", nlpar = "eta") +
+  prior("normal(0, 1)", class = "sd", group = "item", nlpar = "logalpha")
+
+m2PL <- brm(
+  data = d,
+  family = brmsfamily("bernoulli", "identity"),
+  bf(
+    correct ~ 0.5 + 0.5 * inv_logit(exp(logalpha) * eta),
+    eta ~ 1 + (1 |i| item) + (1 | id),
+    logalpha ~ 1 + (1 |i| item),
+    nl = TRUE
+  ),
+  prior = prior_2PL,
+  control = list(adapt_delta = 0.95, max_treedepth = 12),
+  cores = 3,
+  chains = 3,
+  iter = 4000
+)%>%add_criterion(c("loo"))
+
+saveRDS(m2PL, "./saves/m2PL.rds")
+
+m2PL <- readRDS("./saves/m2PL.rds")
+```
+
+## ICC
+
+```{r}
+icc_2PL <- posterior_samples(m2PL)%>% 
+  select(b_eta_Intercept, b_logalpha_Intercept, starts_with("r_item"))%>%
+  mutate(iter = 1:n()) %>% 
+  pivot_longer(starts_with("r_item")) %>%
+  mutate(item      = str_extract(name, pattern = "(?<=\\[).*(?=,Intercept\\])"),
+         parameter = ifelse(str_detect(name, "eta"), "xi", "logalpha"))%>%
+  select(-name) %>% 
+  pivot_wider(names_from = parameter, values_from = value)%>% 
+  expand(nesting(iter, b_eta_Intercept, b_logalpha_Intercept, item, xi, logalpha),
+         theta = seq(from = -6, to = 6, length.out = 100)) %>% 
+  # note the difference in the equation
+  mutate(p = 0.5 + 0.5*inv_logit_scaled(exp(b_logalpha_Intercept + logalpha) * (b_eta_Intercept + theta + xi))) %>% 
+  group_by(theta, item) %>% 
+  summarise(p = mean(p))%>%
+  left_join(d%>%select(item, task)%>%distinct(item, .keep_all = T))
+
+
+```
+
+```{r}
+icc_2PL %>% 
+  #filter(item %in% sel_items_rasch)%>%
+  ggplot(aes(x = theta, y = p,group = item, col = concept_super)) +
+  geom_line() +
+  #facet_wrap(~group)+
+  #guides(col = F)+
+  geom_hline(yintercept = 0.5, lty = 3, alpha = .75)+
+  scale_color_viridis_d(name = "Category") +
+  labs(title = "ICCs for the 2PL",
+       x = expression(theta~('ability on the logit scale')),
+       y = expression(italic(p)(y==1))) +
+  ylim(0,1)+
+  theme_minimal()
+```
