@@ -70,15 +70,15 @@ m1PL <- brm(
     nl = TRUE
   ),
   prior = prior_rasch,
-  control = list(adapt_delta = 0.95, max_treedepth = 12),
+  control = list(adapt_delta = 0.99, max_treedepth = 12),
   cores = 3,
   chains = 3,
-  iter = 4000
+  iter = 6000
 )%>%add_criterion(c("loo"))
 
-saveRDS(m1PL, "./saves/m1PL.rds")
+saveRDS(m1PL, "../saves/m1PL.rds")
 
-m1PL <- readRDS("./saves/m1PL.rds")
+m1PL <- readRDS("../saves/m1PL.rds")
 ```
 
 ```{r}
@@ -204,15 +204,15 @@ m2PL <- brm(
     nl = TRUE
   ),
   prior = prior_2PL,
-  control = list(adapt_delta = 0.95, max_treedepth = 12),
+  control = list(adapt_delta = 0.99, max_treedepth = 12),
   cores = 3,
   chains = 3,
-  iter = 4000
+  iter = 6000
 )%>%add_criterion(c("loo"))
 
-saveRDS(m2PL, "./saves/m2PL.rds")
+saveRDS(m2PL, "../saves/m2PL.rds")
 
-m2PL <- readRDS("./saves/m2PL.rds")
+m2PL <- readRDS("../saves/m2PL.rds")
 ```
 
 ## ICC
@@ -240,7 +240,7 @@ icc_2PL <- posterior_samples(m2PL)%>%
 ```{r}
 icc_2PL %>% 
   #filter(item %in% sel_items_rasch)%>%
-  ggplot(aes(x = theta, y = p,group = item, col = concept_super)) +
+  ggplot(aes(x = theta, y = p,group = item, col = item, lty = task)) +
   geom_line() +
   #facet_wrap(~group)+
   #guides(col = F)+
@@ -251,4 +251,11 @@ icc_2PL %>%
        y = expression(italic(p)(y==1))) +
   ylim(0,1)+
   theme_minimal()
+```
+
+
+# Model comparison 
+
+```{r}
+loo_compare(m1PL, m2PL)%>%as_tibble(rownames = "model")
 ```
